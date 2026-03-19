@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>imadevideo — Rate Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --lime: #C3FF00;
+    --lime-dim: #9acc00;
+    --bg: #080808;
+    --bg2: #111111;
+    --bg3: #171717;
+    --border: rgba(195,255,0,0.12);
+    --text: #e8e8e8;
+    --muted: #5a5a5a;
+    --white: #ffffff;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.4;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    padding: 2rem;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(195,255,0,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    color: var(--lime);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 18vw, 14rem);
+    line-height: 0.88;
+    letter-spacing: -0.01em;
+    color: var(--white);
+    opacity: 0;
+    animation: fadeUp 0.9s 0.35s forwards;
+  }
+
+  .hero-name span {
+    color: var(--lime);
+    display: block;
+  }
+
+  .hero-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    font-size: 1.05rem;
+    color: var(--muted);
+    margin-top: 2rem;
+    letter-spacing: 0.05em;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.5s forwards;
+  }
+
+  .hero-cta {
+    margin-top: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.65s forwards;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--lime);
+    color: #000;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.9rem 2.2rem;
+    text-decoration: none;
+    font-weight: 700;
+    transition: all 0.25s;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+  .btn-primary:hover {
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(195,255,0,0.25);
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    animation: fadeIn 1s 1.2s forwards;
+  }
+  .scroll-hint span {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .scroll-line {
+    width: 1px;
+    height: 50px;
+    background: linear-gradient(to bottom, var(--lime), transparent);
+    animation: scrollLine 2s 1.5s infinite;
+  }
+
+  /* ─── SECTION SHARED ─── */
+  section {
+    padding: 7rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .section-label span {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--lime);
+    text-transform: uppercase;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    line-height: 0.9;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+  }
+
+  .section-desc {
+    font-size: 0.95rem;
+    color: var(--muted);
+    margin-bottom: 3.5rem;
+    max-width: 540px;
+  }
+
+  /* ─── PRICING GRID ─── */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5px;
+    background: var(--border);
+    border: 1.5px solid var(--border);
+  }
+
+  .card {
+    background: var(--bg2);
+    padding: 2.5rem 2rem;
+    position: relative;
+    transition: background 0.3s;
+  }
+  .card:hover { background: var(--bg3); }
+
+  .card.featured {
+    background: var(--bg3);
+    outline: 1.5px solid rgba(195,255,0,0.35);
+    outline-offset: -1.5px;
+  }
+
+  .card-badge {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: var(--lime);
+    color: #000;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .card-level {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.25em;
+    color: var(--lime);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+
+  .card-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 1.5rem;
+  }
+
+  .card-price {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.2rem;
+    margin-bottom: 1.5rem;
+  }
+  .price-dollar {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--lime);
+    margin-top: 0.35rem;
+  }
+  .price-amount {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem;
+    color: var(--white);
+    line-height: 1;
+  }
+
+  .card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .meta-item svg { flex-shrink: 0; }
+  .meta-item strong { color: var(--text); font-weight: 500; }
+
+  /* ─── VIDEO EMBED ─── */
+  .video-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.7rem;
+  }
+
+  .video-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 9/16;
+    background: #0d0d0d;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .video-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+
+  /* ─── MOTION GRID ─── */
+  .motion-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5px;
+    background: var(--border);
+    border: 1.5px solid var(--border);
+    margin-bottom: 2.5rem;
+  }
+
+  .motion-card {
+    background: var(--bg2);
+    padding: 2.2rem 1.8rem;
+    transition: background 0.3s;
+  }
+  .motion-card:hover { background: var(--bg3); }
+
+  .motion-duration {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.15em;
+    color: var(--lime);
+    margin-bottom: 0.4rem;
+  }
+  .motion-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.2rem;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+  .motion-note {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  .motion-refs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .motion-ref-wrap {
+    position: relative;
+    aspect-ratio: 9/16;
+    background: #0d0d0d;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .motion-ref-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+
+  /* ─── LONG FORM VIDEO EMBED ─── */
+  .video-wrap-wide {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #0d0d0d;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .video-wrap-wide iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+
+  /* ─── EXTRA CHARGE BANNER ─── */
+  .extra-banner {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    background: rgba(195,255,0,0.06);
+    border: 1px solid rgba(195,255,0,0.2);
+    padding: 1.2rem 1.8rem;
+    margin-top: 2.5rem;
+  }
+  .extra-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+  .extra-text {
+    font-size: 0.88rem;
+    color: var(--text);
+  }
+  .extra-text strong {
+    color: var(--lime);
+    font-weight: 700;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* ─── TERMS SECTION ─── */
+  .terms-section {
+    padding: 7rem 2rem;
+    background: var(--bg2);
+  }
+  .terms-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .terms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5px;
+    background: var(--border);
+    border: 1.5px solid var(--border);
+    margin-top: 3rem;
+  }
+
+  .term-item {
+    background: var(--bg2);
+    padding: 2rem 1.8rem;
+  }
+
+  .term-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    color: var(--border);
+    line-height: 1;
+    margin-bottom: 0.8rem;
+  }
+  .term-title {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--lime);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .term-body {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ─── PAYMENT SECTION ─── */
+  .payment-section {
+    padding: 8rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .payment-section::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(195,255,0,0.05) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .payment-inner {
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .paypal-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: #0070ba;
+    color: #fff;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 1rem 2.5rem;
+    text-decoration: none;
+    font-weight: 700;
+    margin-top: 2.5rem;
+    transition: all 0.25s;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+  .paypal-btn:hover {
+    background: #005ea6;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0,112,186,0.3);
+  }
+
+  .contact-note {
+    margin-top: 2rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  /* ─── DIVIDER ─── */
+  .full-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border);
+    margin: 0;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    padding: 2rem;
+    text-align: center;
+    border-top: 1px solid var(--border);
+  }
+  footer p {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes scrollLine {
+    0%, 100% { transform: scaleY(1); opacity: 1; }
+    50% { transform: scaleY(0.4); opacity: 0.3; }
+  }
+
+  /* Reveal on scroll */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-d1 { transition-delay: 0.1s; }
+  .reveal-d2 { transition-delay: 0.2s; }
+  .reveal-d3 { transition-delay: 0.3s; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .pricing-grid { grid-template-columns: 1fr; }
+    .motion-grid { grid-template-columns: 1fr; }
+    .motion-refs { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .pricing-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════ HERO ════════════════ -->
+<div class="hero">
+  <p class="hero-eyebrow">Video Editing Service — Rate Card 2025</p>
+  <h1 class="hero-name">imade<span>video</span></h1>
+  <p class="hero-sub">Cinematic editing. Short-form & Long-form. Motion Graphics.</p>
+  <div class="hero-cta">
+    <a href="#packages" class="btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      View Packages
+    </a>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</div>
+
+<div class="full-divider"></div>
+
+<!-- ════════════════ SHORT-FORM ════════════════ -->
+<section id="packages">
+  <div class="section-label reveal">
+    <span>01 — Short-Form Video</span>
+  </div>
+  <h2 class="section-title reveal">Short-Form<br>Editing</h2>
+  <p class="section-desc reveal">Duration 30–90 seconds &nbsp;·&nbsp; Delivery 1–2 days</p>
+
+  <div class="pricing-grid reveal">
+
+    <!-- BASIC -->
+    <div class="card">
+      <div class="card-level">Level 01</div>
+      <div class="card-name">Basic</div>
+      <div class="card-price">
+        <span class="price-dollar">$</span>
+        <span class="price-amount">15.99</span>
+      </div>
+      <div class="card-meta">
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Duration: <strong>30–90 sec</strong></span>
+        </div>
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span>Revision: <strong>1x</strong></span>
+        </div>
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Delivery: <strong>1–2 days</strong></span>
+        </div>
+      </div>
+      <div class="video-label">// Reference Work</div>
+      <div class="video-wrap">
+        <iframe src="https://www.youtube.com/embed/E2oK6z3wMII" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+
+    <!-- INTERMEDIATE -->
+    <div class="card featured">
+      <div class="card-badge">Most Popular</div>
+      <div class="card-level">Level 02</div>
+      <div class="card-name">Intermediate</div>
+      <div class="card-price">
+        <span class="price-dollar">$</span>
+        <span class="price-amount">29.99</span>
+      </div>
+      <div class="card-meta">
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Duration: <strong>30–90 sec</strong></span>
+        </div>
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span>Revision: <strong>2x</strong></span>
+        </div>
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Delivery: <strong>1–2 days</strong></span>
+        </div>
+      </div>
+      <div class="video-label">// Reference Work</div>
+      <div class="video-wrap">
+        <iframe src="https://www.youtube.com/embed/1c1neNWR3Y8" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+
+    <!-- ADVANCED -->
+    <div class="card">
+      <div class="card-level">Level 03</div>
+      <div class="card-name">Advanced</div>
+      <div class="card-price">
+        <span class="price-dollar">$</span>
+        <span class="price-amount">49.99</span>
+      </div>
+      <div class="card-meta">
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Duration: <strong>30–90 sec</strong></span>
+        </div>
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span>Revision: <strong>3x</strong></span>
+        </div>
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Delivery: <strong>1–2 days</strong></span>
+        </div>
+      </div>
+      <div class="video-label">// Reference Work</div>
+      <div class="video-wrap">
+        <iframe src="https://www.youtube.com/embed/rNZyRjAqnEc" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="full-divider"></div>
+
+<!-- ════════════════ MOTION GRAPHICS ════════════════ -->
+<section>
+  <div class="section-label reveal">
+    <span>02 — Motion Graphics</span>
+  </div>
+  <h2 class="section-title reveal">Motion<br>Graphics</h2>
+  <p class="section-desc reveal">Priced by duration &nbsp;·&nbsp; Delivery 3 days</p>
+
+  <div class="motion-grid reveal">
+    <div class="motion-card">
+      <div class="motion-duration">30 Seconds</div>
+      <div class="motion-price">$150</div>
+      <div class="motion-note">Delivery in 3 days</div>
+    </div>
+    <div class="motion-card">
+      <div class="motion-duration">60 Seconds</div>
+      <div class="motion-price">$200</div>
+      <div class="motion-note">Delivery in 3 days</div>
+    </div>
+    <div class="motion-card">
+      <div class="motion-duration">90 Seconds</div>
+      <div class="motion-price">$250</div>
+      <div class="motion-note">Delivery in 3 days</div>
+    </div>
+  </div>
+
+  <p class="video-label reveal" style="margin-bottom:1rem;">// Reference Works</p>
+  <div class="motion-refs reveal">
+    <div class="motion-ref-wrap">
+      <iframe src="https://www.youtube.com/embed/4PY48e91FU4" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+    </div>
+    <div class="motion-ref-wrap">
+      <iframe src="https://www.youtube.com/embed/qif5BiRmJAA" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+    </div>
+    <div class="motion-ref-wrap">
+      <iframe src="https://www.youtube.com/embed/zMEycC6PtFo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+    </div>
+  </div>
+</section>
+
+<div class="full-divider"></div>
+
+<!-- ════════════════ LONG-FORM ════════════════ -->
+<section>
+  <div class="section-label reveal">
+    <span>03 — Long-Form Video</span>
+  </div>
+  <h2 class="section-title reveal">Long-Form<br>Editing</h2>
+  <p class="section-desc reveal">Duration 10–15 minutes &nbsp;·&nbsp; Delivery 5 days</p>
+
+  <div class="pricing-grid reveal">
+
+    <!-- BASIC -->
+    <div class="card">
+      <div class="card-level">Level 01</div>
+      <div class="card-name">Basic</div>
+      <div class="card-price">
+        <span class="price-dollar">$</span>
+        <span class="price-amount">100</span>
+      </div>
+      <div class="card-meta">
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Duration: <strong>10–15 min</strong></span>
+        </div>
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span>Revision: <strong>1x</strong></span>
+        </div>
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Delivery: <strong>5 days</strong></span>
+        </div>
+      </div>
+      <div class="video-label">// Reference Work</div>
+      <div class="video-wrap-wide">
+        <iframe src="https://www.youtube.com/embed/-k9_zr8lpjA" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+
+    <!-- INTERMEDIATE -->
+    <div class="card featured">
+      <div class="card-badge">Most Popular</div>
+      <div class="card-level">Level 02</div>
+      <div class="card-name">Intermediate</div>
+      <div class="card-price">
+        <span class="price-dollar">$</span>
+        <span class="price-amount">150</span>
+      </div>
+      <div class="card-meta">
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Duration: <strong>10–15 min</strong></span>
+        </div>
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span>Revision: <strong>2x</strong></span>
+        </div>
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Delivery: <strong>5 days</strong></span>
+        </div>
+      </div>
+      <div class="video-label">// Reference Work</div>
+      <div class="video-wrap-wide">
+        <iframe src="https://www.youtube.com/embed/EzhWOluIZT8" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+
+    <!-- ADVANCED -->
+    <div class="card">
+      <div class="card-level">Level 03</div>
+      <div class="card-name">Advanced</div>
+      <div class="card-price">
+        <span class="price-dollar">$</span>
+        <span class="price-amount">200</span>
+      </div>
+      <div class="card-meta">
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Duration: <strong>10–15 min</strong></span>
+        </div>
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span>Revision: <strong>3x</strong></span>
+        </div>
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Delivery: <strong>5 days</strong></span>
+        </div>
+      </div>
+      <div class="video-label">// Reference Work</div>
+      <div class="video-wrap-wide">
+        <iframe src="https://www.youtube.com/embed/CaceK21sxQg" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Extra duration charge -->
+  <div class="extra-banner reveal">
+    <span class="extra-icon">⚡</span>
+    <p class="extra-text">
+      <strong>+$12.99 / minute</strong> &nbsp; charged for every additional minute beyond the 15-minute long-form limit. Duration will be confirmed before production begins.
+    </p>
+  </div>
+</section>
+
+<div class="full-divider"></div>
+
+<!-- ════════════════ TERMS ════════════════ -->
+<div class="terms-section">
+  <div class="terms-inner">
+    <div class="section-label reveal">
+      <span>How It Works</span>
+    </div>
+    <h2 class="section-title reveal">Terms &<br>Process</h2>
+
+    <div class="terms-grid">
+
+      <div class="term-item reveal reveal-d1">
+        <div class="term-num">01</div>
+        <div class="term-title">Clear Brief is Required</div>
+        <p class="term-body">Wajib kirim brief yang lengkap dan jelas sebelum pengerjaan dimulai — referensi, mood, tone, target audience. Brief yang kurang jelas = hasil yang meleset. Revisi akibat brief yang tidak clear tidak masuk hitungan revisi gratis.</p>
+      </div>
+
+      <div class="term-item reveal reveal-d2">
+        <div class="term-num">02</div>
+        <div class="term-title">DP 50% Before Production</div>
+        <p class="term-body">Down payment sebesar 50% dari total harga wajib dibayar sebelum pengerjaan dimulai. File/project tidak akan dikerjakan tanpa konfirmasi pembayaran DP. Sisa 50% dilunasi setelah project selesai dan siap kirim.</p>
+      </div>
+
+      <div class="term-item reveal reveal-d3">
+        <div class="term-num">03</div>
+        <div class="term-title">Revision Limit</div>
+        <p class="term-body">Jumlah revisi sesuai paket yang dipilih. Revisi melebihi batas akan dikenakan biaya tambahan sesuai kompleksitas perubahan. Revisi hanya berlaku untuk perubahan minor — bukan ganti konsep total.</p>
+      </div>
+
+      <div class="term-item reveal reveal-d1">
+        <div class="term-num">04</div>
+        <div class="term-title">Invoice & Payment</div>
+        <p class="term-body">Invoice akan dikirimkan secara otomatis setiap transaksi. Pembayaran via PayPal. Amankan semua bukti pembayaran untuk keperluan record kedua belah pihak.</p>
+      </div>
+
+      <div class="term-item reveal reveal-d2">
+        <div class="term-num">05</div>
+        <div class="term-title">File Delivery</div>
+        <p class="term-body">File hasil editing dikirimkan dalam format MP4 resolusi penuh sesuai kebutuhan platform (Shorts / Reels / YouTube). Pengiriman melalui Google Drive atau WeTransfer.</p>
+      </div>
+
+      <div class="term-item reveal reveal-d3">
+        <div class="term-num">06</div>
+        <div class="term-title">Revision Charge Notice</div>
+        <p class="term-body">Jika revisi melebihi batas yang disepakati, biaya tambahan akan dikomunikasikan terlebih dahulu dan harus disetujui sebelum dikerjakan. Tidak ada biaya tersembunyi.</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ PAYMENT CTA ════════════════ -->
+<div class="payment-section">
+  <div class="payment-inner">
+    <div class="section-label reveal" style="justify-content:center;">
+      <span>Ready to Start?</span>
+    </div>
+    <h2 class="section-title reveal" style="font-size:clamp(3rem,8vw,6rem);">Let's Make<br><span style="color:var(--lime);">Something</span><br>Cinematic.</h2>
+    <p class="section-desc reveal" style="margin:1.5rem auto 0;text-align:center;">Pilih paket, kirim brief lengkap, dan lakukan DP 50% via PayPal untuk mulai pengerjaan.</p>
+    <div class="reveal">
+      <a href="https://www.paypal.com" target="_blank" class="paypal-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.93 4.778-4.005 7.201-9.138 7.201h-2.19a.563.563 0 0 0-.556.479l-1.187 7.527h-.506l-.24 1.516a.56.56 0 0 0 .554.647h3.882c.46 0 .85-.334.922-.788.06-.26.76-4.852.816-5.09a.932.932 0 0 1 .923-.788h.58c3.76 0 6.705-1.528 7.565-5.946.36-1.847.174-3.388-.777-4.471z"/></svg>
+        Pay via PayPal
+      </a>
+    </div>
+    <p class="contact-note reveal">Hubungi via DM untuk konsultasi brief sebelum order &nbsp;·&nbsp; Invoice dikirim otomatis tiap transaksi</p>
+  </div>
+</div>
+
+<footer>
+  <p>© 2025 imadevideo &nbsp;·&nbsp; Cinematic Video Editing Service &nbsp;·&nbsp; All Rights Reserved</p>
+</footer>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
